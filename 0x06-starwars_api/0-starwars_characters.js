@@ -2,41 +2,17 @@
 
 const request = require('request');
 
-const makeRequest = (url) => {
-  return new Promise((resolve, reject) => {
-    request(url, (err, res, body) => {
-      if (err) return reject(err);
-      resolve(JSON.parse(body));
-    });
+request('https://swapi-api.hbtn.io/api/films/' + process.argv[2], function (error, response, body) {
+  if (error) throw error;
+  const movie_actors = JSON.parse(body).characters;
+  exactOrder(movie_actors, 0);
+});
+
+const exactOrder = (movie_actors, x) => {
+  if (x === movie_actors.length) return;
+  request(movie_actors[x], function (error, response, body) {
+    if (error) throw error;
+    console.log(JSON.parse(body).name);
+    exactOrder(movie_actors, x + 1);
   });
 };
-
-const printActorsInOrder = async (actors, index = 0) => {
-  if (index >= actors.length) return;
-
-  try {
-    const actor = await makeRequest(actors[index]);
-    console.log(actor.name);
-    await printActorsInOrder(actors, index + 1);
-  } catch (err) {
-    console.error('Error fetching actor:', err);
-  }
-};
-
-const fetchMovieCharacters = async () => {
-  const movieId = process.argv[2];
-  if (!movieId) {
-    console.error('Please provide a movie ID as the first argument.');
-    return;
-  }
-
-  try {
-    const film = await makeRequest('https://swapi-api.hbtn.io/api/films/' + movieId);
-    const actors = film.characters;
-    await printActorsInOrder(actors);
-  } catch (err) {
-    console.error('Error fetching movie data:', err);
-  }
-};
-
-fetchMovieCharacters();
