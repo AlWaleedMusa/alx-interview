@@ -5,6 +5,7 @@ Make change
 
 
 def makeChange(coins, total):
+    """Make change function"""
     if total <= 0:
         return 0
 
